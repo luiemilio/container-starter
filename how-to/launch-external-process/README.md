@@ -3,9 +3,9 @@
 This repository demonstrates the use of the `System.launchExternalProcess`, to launch an `appAsset` defined in an Application's manifest. `System.launchExternalProcess` is a [secure API][1] that can be enabled by user acceptance, or [desktop owner settings][2].
 
 [1]: https://developers.openfin.co/of-docs/docs/api-security "Read more on secure api here"
+[2]: https://developers.openfin.co/of-docs/docs/desktop-owner-settings "Read more on desktop owner settings here"
 
 ## How to use this repository.
-
 
 Follow the instructions below to get up and running!
 
@@ -14,7 +14,7 @@ Follow the instructions below to get up and running!
 3. `npm run start` start the server 
 4. `npm run client` launch the application
 
-### App asset breakdown
+## App asset breakdown
 
 This is an example shape as it related to the top level application manifest property as seen [here](https://developers.openfin.co/of-docs/docs/application-configuration#section-appassets-properties).
 
@@ -30,7 +30,7 @@ This is an example shape as it related to the top level application manifest pro
 }],
 ```
 
-#### Property definitions
+### Property definitions
 
 -   `"src"`: url to an accessible compressed zip file containing the executable.
 -   `"version"`: a string to store that corresponds with the directory the application asset is stored under on disk.
