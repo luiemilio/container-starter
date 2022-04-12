@@ -54,7 +54,7 @@ app.get('/manifest', (req, res) => {
             ]
         }
         });
-   }else{
+   }else if(env === 'staging'){
     res.json({
         "licenseKey": "openfin-demo-license-key",
         "runtime": {
@@ -103,6 +103,10 @@ app.get('/manifest', (req, res) => {
             ]
         }
         });
+   }else if(env === 'workspace'){
+    res.json({
+        "url": "https://www.google.com"
+      });
    }
 })
 
