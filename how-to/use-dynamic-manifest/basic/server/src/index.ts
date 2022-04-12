@@ -1,7 +1,7 @@
 import *  as express from "express";
 import * as path from "path";
 const app = express();
-const port = 8080;
+const port = 3000;
 
 app.get('/manifest', (req, res) => {
    const env = req.query.env;
@@ -15,7 +15,7 @@ app.get('/manifest', (req, res) => {
         "platform": {
             "uuid": "how-to-use-dynamic-manifest-basic",
             "autoShow": false,
-            "icon":"http://localhost:8080/favicon.ico",
+            "icon":"http://localhost:3000/favicon.ico",
             "preloadScripts": [
             ],
             "defaultWindowOptions": {
@@ -43,7 +43,7 @@ app.get('/manifest', (req, res) => {
                         "componentName": "view",
                         "componentState": {
                             "processAffinity": "ps_1",
-                             "url": "http://localhost:8080/html/app-dev.html"
+                             "url": "http://localhost:3000/html/app-dev.html"
                         }
                         }
                     ]
@@ -64,7 +64,7 @@ app.get('/manifest', (req, res) => {
         "platform": {
             "uuid": "how-to-use-dynamic-manifest-basic",
             "autoShow": false,
-            "icon":"http://localhost:8080/favicon.ico",
+            "icon":"http://localhost:3000/favicon.ico",
             "preloadScripts": [
             ],
             "defaultWindowOptions": {
@@ -92,7 +92,7 @@ app.get('/manifest', (req, res) => {
                         "componentName": "view",
                         "componentState": {
                             "processAffinity": "ps_1",
-                            "url": "http://localhost:8080/html/app-staging.html"
+                            "url": "http://localhost:3000/html/app-staging.html"
                         }
                         }
                     ]
