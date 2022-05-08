@@ -1,4 +1,4 @@
-import { fin } from "openfin-adapter/src/mock";
+import OpenFin, { fin } from "@openfin/core";
 
 const topic = '/openfin/sample/security-realm-example';
 

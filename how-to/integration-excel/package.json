@@ -20,7 +20,7 @@
   "devDependencies": {
     "@finos/fdc3": "^1.2.0",
     "express": "^4.17.2",
-    "openfin-adapter": "^23.67.7",
+    "@openfin/core": "^25.68.26",
     "source-map-loader": "^3.0.1",
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.4",

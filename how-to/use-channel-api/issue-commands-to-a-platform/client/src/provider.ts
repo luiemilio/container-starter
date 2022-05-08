@@ -1,4 +1,4 @@
-import { fin } from "openfin-adapter/src/mock";
+import OpenFin, { fin } from "@openfin/core";
 
 async function init(): Promise<void> {
     // create a channel to receive commands from external apps
