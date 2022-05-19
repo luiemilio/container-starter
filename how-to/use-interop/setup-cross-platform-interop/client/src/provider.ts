@@ -1,80 +1,80 @@
 import { InteropBroker } from 'openfin-adapter/src/api/interop';
 import { fin } from 'openfin-adapter/src/mock';
 
-const p = document.querySelector('#uuid');
-p.innerHTML = `${fin.me.uuid} provider`;
-
 const interopOverride = async (InteropBroker, provider, options, ...args) => {
     class Override extends InteropBroker {
         constructor(provider, options, ...args) {
             super(provider, options, ...args);
-            // this.externalBrokers = ['platform_customization_local-2'];
-            // this.externalClients = new Map();
-            // this.initializeBrokers();
+            this.externalBrokers = ['platform-2'];
+            this.externalClients = new Map();
+            this.initializeBrokers();
+            this.contextUuids = [];
         }
 
-        // async initializeBrokers() {
-            // this.externalBrokers.forEach(async (brokerUuid) => {
-            //     const tempClient = fin.Interop.connectSync(brokerUuid);
-            //     const app = fin.Application.wrapSync({ uuid: brokerUuid });
-    
-            //     if (tempClient.isRunning) {
-            //         await this.setupContextGroups(tempClient, brokerUuid);
-            //     }
-                
-            //     const listener = async (channelPayload) => {
-            //         if (channelPayload.channelName === `interop-broker-${brokerUuid}`) {
-            //             await this.setupContextGroups(tempClient, brokerUuid);
-            //         }
-            //     };
+        async initializeBrokers() {
+            this.externalBrokers.forEach(async (brokerUuid) => {
+                const platform = fin.Platform.wrapSync({ uuid: brokerUuid });
 
-            //     fin.InterApplicationBus.Channel.onChannelConnect(listener);
-        
-            //     app.once('closed', () => {
-            //         this.externalClients.delete(brokerUuid);
-            //     });
-            // });
-        // }
+                if (await platform.Application.isRunning()) {
+                    await this.setupContextGroups(brokerUuid);
+                }
 
-        // async setupContextGroups(client, brokerUuid) {
-        //     const contextGroups = await client.getContextGroups();
-        //     const colorClientsMap = new Map();
+                platform.on('platform-api-ready', async () => {
+                    await this.setupContextGroups(brokerUuid);
+                });
 
-        //     contextGroups.forEach(async (ctxGrpInfo) => {
-        //         const colorClient = fin.Interop.connectSync(brokerUuid);
-        //         await colorClient.joinContextGroup(ctxGrpInfo.id);
+                platform.Application.once('closed', () => {
+                    this.externalClients.delete(brokerUuid);
+                });
+            });
+        }
 
-        //         await colorClient.addContextHandler(async (context) => {
-        //             const tempClient = fin.Interop.connectSync(fin.me.uuid);
-        //             await tempClient.joinContextGroup(ctxGrpInfo.id);
-        //             tempClient.setContext(context);
-        //         });
+        async setupContextGroups(brokerUuid) {
+            const client = fin.Interop.connectSync(brokerUuid, {});
+            const contextGroups = await client.getContextGroups();
+            const colorClientsMap = new Map();
 
-        //         colorClientsMap.set(ctxGrpInfo.id, colorClient);
-        //     });
+            contextGroups.forEach(async (ctxGrpInfo) => {
+                const colorClient = fin.Interop.connectSync(brokerUuid, {});
+                await colorClient.joinContextGroup(ctxGrpInfo.id);
 
-        //     this.externalClients.set(brokerUuid, colorClientsMap);
-        // }
+                await colorClient.addContextHandler(async (context: any) => {
+                    if (!context.uuid || (context?.uuid && !this.contextUuids.includes(context.uuid))) {
+                        const tempClient = fin.Interop.connectSync(fin.me.uuid, {});
+                        await tempClient.joinContextGroup(ctxGrpInfo.id);
+                        tempClient.setContext(context);
+                    }
+                });
 
-        // async setContext(payload, clientIdentity) {
-        //     const { context } = payload;
+                colorClientsMap.set(ctxGrpInfo.id, colorClient);
+            });
 
-        //     if (this.externalClients.size > 0) {
-        //         const state = this.getClientState(clientIdentity);
-                
-        //         this.externalClients.forEach((colorClientsMap) => {
-        //             if (colorClientsMap.has(state.contextGroupId)) {
-        //                 const colorClient = colorClientsMap.get(state.contextGroupId);
-        //                 colorClient.setContext(context);
-        //             }
-        //         });
-        //     }
+            this.externalClients.set(brokerUuid, colorClientsMap);
+        }
 
-        //     super.setContext(payload, clientIdentity);
-        // }
+        async setContext(payload, clientIdentity) {
+            const { context } = payload;
+            const uuid = crypto.randomUUID();
+            const newContext = { ...context, uuid };
+
+            this.contextUuids.push(uuid);
+
+            if (this.externalClients.size > 0) {
+                const state = this.getClientState(clientIdentity);
+
+                this.externalClients.forEach((colorClientsMap) => {
+                    if (colorClientsMap.has(state.contextGroupId)) {
+                        const colorClient = colorClientsMap.get(state.contextGroupId);
+                        colorClient.setContext(newContext);
+                    }
+                });
+            }
+
+            super.setContext({ ...payload, context: newContext }, clientIdentity);
+        }
     }
 
-    return new Override(provider, options, ...args) as InteropBroker;
+    return (new Override(provider, options, ...args) as unknown as InteropBroker);
 }
 
 const platformConfig = fin.me.uuid === 'platform-1' ? { interopOverride } : null;

@@ -6,10 +6,11 @@
     "platform": {
         "uuid": "platform-2",
         "icon": "https://openfin.github.io/golden-prototype/favicon.ico",
-        "autoShow": true,
+        "autoShow": false,
         "providerUrl": "http://localhost:5555/html/provider.html",
         "apiDiagnostics": false,
         "defaultWindowOptions": {
+            "url": "http://localhost:5555/html/window.html",
             "contextMenu": true,
             "defaultWidth": 600,
             "defaultHeight": 600,
@@ -29,8 +30,15 @@
                 "layout": {
                     "content": [
                         {
-                            "type": "stack",
+                            "type": "row",
                             "content": [                             
+                                {
+                                    "type": "component",
+                                    "componentName": "view",
+                                    "componentState": {
+                                        "url": "http://localhost:5555/html/view.html"
+                                    }
+                                },
                                 {
                                     "type": "component",
                                     "componentName": "view",
