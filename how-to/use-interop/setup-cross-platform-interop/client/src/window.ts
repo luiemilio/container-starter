@@ -7,8 +7,6 @@ const ofApp = fin.Application.getCurrentSync();
 
 
 let lastFocusedView;
-const styleObj = document.styleSheets[0];
-const buttonsWrapper = document.getElementById('buttons-wrapper');
 
 ofApp.on('view-focused', (viewEvent) => {
     lastFocusedView = viewEvent.viewIdentity;
@@ -23,11 +21,13 @@ const changeContextGroup = async (evt) => {
 
 const addContextGroupsBtns = async () => {
     const contextGroups = await fin.me.interop.getContextGroups();
+    const styleObj = document.styleSheets[0];
+    const buttonsWrapper = document.getElementById('buttons-wrapper');
 
     contextGroups.forEach(systemChannel => {
         styleObj.insertRule(`.${systemChannel.displayMetadata.name}-channel { border-left: 2px solid ${systemChannel.displayMetadata.color} !important;}`);
         styleObj.insertRule(`#${systemChannel.displayMetadata.name}-button:after { background-color: ${systemChannel.displayMetadata.color}}`);
-        const newButton = document.createElement('div')
+        const newButton = document.createElement('div');
         newButton.classList.add('button');
         newButton.classList.add('channel-button');
         newButton.id = `${systemChannel.displayMetadata.name}-button`;
@@ -55,22 +55,24 @@ const minimizeWindow = () => {
 
 
 
-const setupTitleBarButtons = () => {
+const setupTitleBar = () => {
+    const title = document.querySelector('#title');
     const minBtn = document.getElementById('minimize-button');
-    minBtn.onclick = minimizeWindow;
-
     const maxBtn = document.getElementById('expand-button');
-    maxBtn.onclick = maxOrRestore;
-
     const closeBtn = document.getElementById('close-button');
+    
+    title.innerHTML = fin.me.identity.uuid;
+    minBtn.onclick = minimizeWindow;
+    maxBtn.onclick = maxOrRestore;
     closeBtn.onclick = closeWindow;
 
     addContextGroupsBtns();
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-    fin.Platform.Layout.init({containerId: CONTAINER_ID});
-    setupTitleBarButtons();
+window.addEventListener('DOMContentLoaded', async () => {
+    await fin.Platform.Layout.init({ containerId: CONTAINER_ID });
+    setupTitleBar();
+
 });
 
 

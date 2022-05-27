@@ -1,4 +1,4 @@
-import { InteropBroker } from 'openfin-adapter/src/api/interop';
+import type { InteropBroker } from 'openfin-adapter/src/api/interop';
 import { fin } from 'openfin-adapter/src/mock';
 
 const interopOverride = async (InteropBroker, provider, options, ...args) => {
@@ -11,7 +11,7 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
             this.contextUuids = [];
         }
 
-        async initializeBrokers() {
+        async initializeBrokers(): Promise<void> {
             this.externalBrokers.forEach(async (brokerUuid) => {
                 const platform = fin.Platform.wrapSync({ uuid: brokerUuid });
 
@@ -29,22 +29,26 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
             });
         }
 
-        async setupContextGroups(brokerUuid) {
+        async setupContextGroups(brokerUuid: string): Promise<void> {
             const client = fin.Interop.connectSync(brokerUuid, {});
             const contextGroups = await client.getContextGroups();
             const colorClientsMap = new Map();
+            const tempClient = fin.Interop.connectSync(fin.me.uuid, {});
+            const ctxGrps = await tempClient.getContextGroups();
 
             contextGroups.forEach(async (ctxGrpInfo) => {
                 const colorClient = fin.Interop.connectSync(brokerUuid, {});
                 await colorClient.joinContextGroup(ctxGrpInfo.id);
+                const hasGrp = ctxGrps.some(info => info.id === ctxGrpInfo.id);
 
-                await colorClient.addContextHandler(async (context: any) => {
-                    if (!context.uuid || (context?.uuid && !this.contextUuids.includes(context.uuid))) {
-                        const tempClient = fin.Interop.connectSync(fin.me.uuid, {});
-                        await tempClient.joinContextGroup(ctxGrpInfo.id);
-                        tempClient.setContext(context);
-                    }
-                });
+                if (hasGrp) {
+                    await colorClient.addContextHandler(async (context: any) => {
+                        if (!context.uuid || (context?.uuid && context.uuid !== fin.me.uuid)) {
+                            await tempClient.joinContextGroup(ctxGrpInfo.id);
+                            tempClient.setContext(context);
+                        }
+                    });
+                }
 
                 colorClientsMap.set(ctxGrpInfo.id, colorClient);
             });
@@ -52,12 +56,9 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
             this.externalClients.set(brokerUuid, colorClientsMap);
         }
 
-        async setContext(payload, clientIdentity) {
+        async setContext(payload: any, clientIdentity: OpenFin.ClientIdentity): Promise<void> {
             const { context } = payload;
-            const uuid = crypto.randomUUID();
-            const newContext = { ...context, uuid };
-
-            this.contextUuids.push(uuid);
+            const newContext = { ...context, uuid: fin.me.uuid };
 
             if (this.externalClients.size > 0) {
                 const state = this.getClientState(clientIdentity);
