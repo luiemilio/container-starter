@@ -8,7 +8,6 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
             this.externalBrokers = ['platform-2'];
             this.externalClients = new Map();
             this.initializeBrokers();
-            this.contextUuids = [];
         }
 
         async initializeBrokers(): Promise<void> {
@@ -40,8 +39,8 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
                 const colorClient = fin.Interop.connectSync(brokerUuid, {});
                 await colorClient.joinContextGroup(ctxGrpInfo.id);
                 const hasGrp = ctxGrps.some(info => info.id === ctxGrpInfo.id);
-
-                if (hasGrp) {
+                
+                if (hasGrp) {           
                     await colorClient.addContextHandler(async (context: any) => {
                         if (!context.uuid || (context?.uuid && context.uuid !== fin.me.uuid)) {
                             await tempClient.joinContextGroup(ctxGrpInfo.id);

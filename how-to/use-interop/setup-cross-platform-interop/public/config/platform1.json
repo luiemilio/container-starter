@@ -1,7 +1,7 @@
 {
     "runtime": {
-        "arguments": "--v=1 --inspect",
-        "version": "stable"
+        "arguments": "",
+        "version": "25.100.70.3"
     },
     "platform": {
         "uuid": "platform-1",

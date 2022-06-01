@@ -1,6 +1,6 @@
 # How To Use Interop API
 
-This directory contains information related to how to use the Interop API.
+This directory contains information related to how to use the OpenFin Interop API.
 
 ## What you can do with this repository
 
@@ -10,7 +10,7 @@ This repository contains examples showing how to use the Interop API across your
 
   | Example         | Description |
 |---------------------|------------------------------------
-| [How To - Setup Cross-Platform Interop](./setup-cross-platform-interop) | Description goes here
+| [How To - Setup Cross-Platform Interop](./setup-cross-platform-interop) | How to seamlessly connect to another Interop Broker using Platform Overrides
 
 ## Before you get started
 
