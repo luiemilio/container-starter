@@ -44,7 +44,8 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
                     await colorClient.addContextHandler(async (context: any) => {
                         if (!context.uuid || (context?.uuid && context.uuid !== fin.me.uuid)) {
                             await tempClient.joinContextGroup(ctxGrpInfo.id);
-                            tempClient.setContext(context);
+                            const newContext = { ...context, uuid: brokerUuid };
+                            tempClient.setContext(newContext);
                         }
                     });
                 }
@@ -62,8 +63,8 @@ const interopOverride = async (InteropBroker, provider, options, ...args) => {
             if (this.externalClients.size > 0) {
                 const state = this.getClientState(clientIdentity);
 
-                this.externalClients.forEach((colorClientsMap) => {
-                    if (colorClientsMap.has(state.contextGroupId)) {
+                this.externalClients.forEach((colorClientsMap, brokerUuid) => {
+                    if (colorClientsMap.has(state.contextGroupId) && (!context.uuid || (context?.uuid && context.uuid !== brokerUuid))) {
                         const colorClient = colorClientsMap.get(state.contextGroupId);
                         colorClient.setContext(newContext);
                     }
