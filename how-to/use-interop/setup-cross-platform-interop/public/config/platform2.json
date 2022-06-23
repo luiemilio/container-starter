@@ -1,12 +1,12 @@
 {
     "runtime": {
         "arguments": "",
-        "version": "stable"
+        "version": "canary"
     },
     "platform": {
         "uuid": "platform-2",
         "icon": "https://openfin.github.io/golden-prototype/favicon.ico",
-        "autoShow": false,
+        "autoShow": true,
         "providerUrl": "http://localhost:5555/html/provider.html",
         "apiDiagnostics": false,
         "defaultWindowOptions": {

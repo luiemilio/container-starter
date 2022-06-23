@@ -4,7 +4,7 @@
         "version": "canary"
     },
     "platform": {
-        "uuid": "platform-1",
+        "uuid": "platform-3",
         "icon": "https://openfin.github.io/golden-prototype/favicon.ico",
         "autoShow": true,
         "providerUrl": "http://localhost:5555/html/provider.html",

@@ -20,7 +20,7 @@ const handleCountryChange = (contextInfo) => {
 }
 
 const handleInteropChange = (contextInfo) => {
-    console.log('context incoming', contextInfo)
+    console.log('###############context incoming##########################', contextInfo)
     const { type  } = contextInfo;
 
     switch (type) {
