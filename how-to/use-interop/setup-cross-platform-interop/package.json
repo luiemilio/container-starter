@@ -22,6 +22,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@openfin/core": "^26.70.16",
     "express": "^4.18.1",
     "openfin-adapter": "^25.69.8",
     "ts-loader": "^9.3.0",

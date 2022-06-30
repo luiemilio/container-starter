@@ -1,11 +1,16 @@
-import type { InteropBroker } from 'openfin-adapter/src/api/interop';
-import { fin } from 'openfin-adapter/src/mock';
+import OpenFin, { fin } from '@openfin/core';
+
+interface ExternalContext extends OpenFin.Context {
+    metadata?: {
+        uuid: string;
+    }
+}
 
 const crossPlatformOverride = async (InteropBroker, provider, options, ...args) => {
     class Override extends InteropBroker {
         constructor(provider, options, ...args) {
             super(provider, options, ...args);
-            this.externalBroker = 'platform-3';
+            this.externalBroker = 'platform-2';
             this.externalClients = new Map();
             this.initializeBrokers();
         }
@@ -14,20 +19,20 @@ const crossPlatformOverride = async (InteropBroker, provider, options, ...args) 
             const platform = fin.Platform.wrapSync({ uuid: this.externalBroker });
 
             if (await platform.Application.isRunning()) {
-                await this.setupContextGroups(this.externalBroker);
+                await this.setupContextGroups();
             }
 
             platform.on('platform-api-ready', async () => {
-                await this.setupContextGroups(this.externalBroker);
+                await this.setupContextGroups();
             });
 
-            platform.Application.once('closed', () => {
-                this.externalClients.delete(this.externalBroker);
+            platform.Application.on('closed', () => {
+                this.externalClients = new Map();
             });
         }
 
-        async setupContextGroups(brokerUuid: string): Promise<void> {
-            const client = fin.Interop.connectSync(brokerUuid, {});
+        async setupContextGroups(): Promise<void> {
+            const client = fin.Interop.connectSync(this.externalBroker, {});
             const contextGroups = await client.getContextGroups();
             const tempClient = fin.Interop.connectSync(fin.me.uuid, {});
             const ctxGrps = await tempClient.getContextGroups();
@@ -36,10 +41,10 @@ const crossPlatformOverride = async (InteropBroker, provider, options, ...args) 
                 const hasGrp = ctxGrps.some(info => info.id === ctxGrpInfo.id);
 
                 if (hasGrp) {
-                    const colorClient = fin.Interop.connectSync(brokerUuid, {});
+                    const colorClient = fin.Interop.connectSync(this.externalBroker, {});
                     await colorClient.joinContextGroup(ctxGrpInfo.id);
 
-                    await colorClient.addContextHandler(async (context: any) => {
+                    await colorClient.addContextHandler(async (context: ExternalContext) => {
                         await tempClient.joinContextGroup(ctxGrpInfo.id);
                         const newContext = context.metadata?.uuid ? context : { ...context, metadata: { uuid: this.externalBroker } };
                         await tempClient.setContext(newContext);
@@ -56,7 +61,7 @@ const crossPlatformOverride = async (InteropBroker, provider, options, ...args) 
             }
         }
 
-        async setContextOnExternalClients(context, clientIdentity): Promise<void> {
+        async setContextOnExternalClient(context, clientIdentity): Promise<void> {
             const state = this.getClientState(clientIdentity);
 
             if (this.externalClients.has(state.contextGroupId)) {
@@ -72,19 +77,21 @@ const crossPlatformOverride = async (InteropBroker, provider, options, ...args) 
                 const { metadata: { uuid } } = context; 
                 
                 if ((uuid !== fin.me.uuid && uuid !== this.externalBroker) || uuid === this.externalBroker) {
-                    await super.setContext(payload, clientIdentity);
+                    const newContext = context;
+                    delete newContext.metadata;
+                    await super.setContext({ ...payload, context: newContext}, clientIdentity);
                 }
             } else {
                 const newContext = { ...context, metadata: { uuid: fin.me.uuid } };
-                this.setContextOnExternalClients(newContext, clientIdentity);
+                this.setContextOnExternalClient(newContext, clientIdentity);
                 await super.setContext(payload, clientIdentity);
             }
         }
     }
 
-    return (new Override(provider, options, ...args) as unknown as InteropBroker);
+    return (new Override(provider, options, ...args) as unknown as OpenFin.InteropBroker);
 }
 
-const platformConfig = (fin.me.uuid === 'platform-1' || fin.me.uuid === 'platform-2') ? { interopOverride: crossPlatformOverride } : null;
+const platformConfig = fin.me.uuid === 'platform-1'  ? { interopOverride: crossPlatformOverride } : null;
 
 fin.Platform.init(platformConfig);

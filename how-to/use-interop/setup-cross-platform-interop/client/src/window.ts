@@ -5,7 +5,6 @@ export const CONTAINER_ID = 'layout-container';
 const ofWin = fin.Window.getCurrentSync();
 const ofApp = fin.Application.getCurrentSync();
 
-
 let lastFocusedView;
 
 ofApp.on('view-focused', (viewEvent) => {
@@ -53,8 +52,6 @@ const minimizeWindow = () => {
     return ofWin.minimize();
 }; 
 
-
-
 const setupTitleBar = () => {
     const title = document.querySelector('#title');
     const minBtn = document.getElementById('minimize-button');
@@ -72,7 +69,6 @@ const setupTitleBar = () => {
 window.addEventListener('DOMContentLoaded', async () => {
     await fin.Platform.Layout.init({ containerId: CONTAINER_ID });
     setupTitleBar();
-
 });
 
 
