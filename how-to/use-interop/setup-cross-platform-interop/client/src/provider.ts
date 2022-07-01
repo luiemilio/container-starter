@@ -92,6 +92,4 @@ const crossPlatformOverride = async (InteropBroker, provider, options, ...args) 
     return (new Override(provider, options, ...args) as unknown as OpenFin.InteropBroker);
 }
 
-const platformConfig = fin.me.uuid === 'platform-1'  ? { interopOverride: crossPlatformOverride } : null;
-
-fin.Platform.init(platformConfig);
+fin.Platform.init({ interopOverride: crossPlatformOverride });
